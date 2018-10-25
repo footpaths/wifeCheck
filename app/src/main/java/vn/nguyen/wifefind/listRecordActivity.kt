@@ -14,6 +14,15 @@ import android.view.MenuItem
 import android.widget.Toast
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.ValueEventListener
+import android.content.DialogInterface
+import androidx.appcompat.app.AlertDialog
+
+
+
+
 
 
 
@@ -23,7 +32,7 @@ class listRecordActivity : AppCompatActivity() {
     private var mDatabase: DatabaseReference? = null
     private var myAdapter: ListAppReceiveAdapter? = null
     private val listRecorder = ArrayList<Upload>()
-
+    var alertDialog:AlertDialog?=null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list_record)
@@ -70,7 +79,7 @@ class listRecordActivity : AppCompatActivity() {
                 val database = FirebaseDatabase.getInstance()
                 val myRef = database.getReference("message")
 
-                myRef.setValue("trua")
+                myRef.setValue("true")
                 return true
             }
             R.id.menu_off -> {
@@ -83,6 +92,62 @@ class listRecordActivity : AppCompatActivity() {
 
                 return true
             }
+            R.id.findLocation -> {
+               // startSettings()
+                val database = FirebaseDatabase.getInstance()
+                val myRef = database.getReference("checkLocation")
+
+                myRef.setValue("true")
+               // Toast.makeText(this@listRecordActivity, "false", Toast.LENGTH_SHORT).show()
+
+                return true
+            }
+            R.id.ShowLocation -> {
+               // startSettings()
+                val database = FirebaseDatabase.getInstance()
+                val myRef = database.getReference("locationResult")
+
+
+                myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        try {
+                            var address = dataSnapshot.getValue(String::class.java)
+                              alertDialog = AlertDialog.Builder(this@listRecordActivity)
+                                    //set icon
+                                    .setIcon(android.R.drawable.ic_dialog_alert)
+                                    //set title
+                                    .setTitle("Hô biến!! Đã tìm ra..")
+                                    //set message
+                                    .setMessage("Ng ấy đang ở: $address")
+                                    //set positive button
+                                    .setPositiveButton("Yes") { _, i ->
+                                    alertDialog!!.dismiss()
+
+                                    }
+                                    //set negative button
+                                    .setNegativeButton("No") { _, i ->
+                                        alertDialog!!.dismiss()
+
+                                    }
+                                    .show()
+                           // Toast.makeText(this@listRecordActivity,"Ng ây đang ở: $address",Toast.LENGTH_LONG).show()
+                        }catch (e:Exception){
+                            e.printStackTrace()
+                        }
+
+                        //do what you want with the email
+                    }
+
+                    override fun onCancelled(databaseError: DatabaseError) {
+
+                    }
+                })
+               // Toast.makeText(this@listRecordActivity, "false", Toast.LENGTH_SHORT).show()
+
+                return true
+            }
+
+
             else -> return super.onOptionsItemSelected(item)
         }
     }
